@@ -184,7 +184,7 @@
     "label": "Health dashboard",
     "description": "Private health dashboard",
     "envVar": "HEALTH_DASHBOARD_PROBE_URL",
-    "defaultOrigin": "https://os-june-monitor-production.up.railway.app",
+    "defaultOrigin": "https://health.opensoftware.co",
     "path": "/",
     "critical": true,
     "healthyDetail": "Dashboard is reachable"

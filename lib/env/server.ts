@@ -33,7 +33,7 @@ export function getServerEnv(): ServerEnv {
     CHAT_WEB_URL: serviceOrigin("CHAT_WEB_URL", "https://chat.opensoftware.co"),
     HEALTH_DASHBOARD_PROBE_URL: serviceOrigin(
       "HEALTH_DASHBOARD_PROBE_URL",
-      "https://os-june-monitor-production.up.railway.app",
+      "https://health.opensoftware.co",
     ),
   };
   return {
