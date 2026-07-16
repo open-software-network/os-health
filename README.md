@@ -1,6 +1,6 @@
 # Open Software health
 
-A private production health dashboard and durable alert worker for Open Software. The dashboard uses OS Accounts login and an exact server-side user id allowlist. The worker runs independently, probes production every five minutes, retries failures before alerting, and posts only new or changed active outages to Slack.
+A private production health dashboard and durable alert worker for Open Software. The dashboard uses OS Accounts login and an exact server-side user id allowlist. The worker runs independently, probes production every five minutes, retries failures before alerting, and posts new or changed outages and outage recoveries to Slack.
 
 Production: [health.opensoftware.co](https://health.opensoftware.co)
 
@@ -63,4 +63,4 @@ The production project runs two Railway services from this repository's `main` b
 - `os-health-web`: build with `Dockerfile`, expose port `3010`, and attach `health.opensoftware.co`.
 - `os-health-worker`: build with `Dockerfile.worker`, keep one replica, set `SLACK_HEALTH_WEBHOOK_URL` as a secret, and mount a persistent volume at `/data`.
 
-Set `APP_ORIGIN`, `HEALTH_DASHBOARD_URL`, and `HEALTH_DASHBOARD_PROBE_URL` to `https://health.opensoftware.co`. Store the OAuth client id, authorized user ids, and Slack webhook only in Railway service variables. Production alerts go to `#os-health` only when a retry confirms a new or changed active outage.
+Set `APP_ORIGIN`, `HEALTH_DASHBOARD_URL`, and `HEALTH_DASHBOARD_PROBE_URL` to `https://health.opensoftware.co`. Store the OAuth client id, authorized user ids, and Slack webhook only in Railway service variables. Production alerts go to `#os-health` when a retry confirms a new or changed active outage and when all checks recover.

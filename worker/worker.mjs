@@ -15,12 +15,20 @@ export function sameFailures(left, right) {
   return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
-export function shouldPostOutage(previousFailures, currentFailures) {
-  return currentFailures.length > 0
-    && (previousFailures === null || !sameFailures(previousFailures, currentFailures));
+export function shouldPostStateChange(previousFailures, currentFailures) {
+  if (previousFailures === null) return currentFailures.length > 0;
+  return !sameFailures(previousFailures, currentFailures);
 }
 
 export function buildStateChangeMessage(previousFailures, currentFailures, snapshot, dashboardUrl) {
+  if (currentFailures.length === 0) {
+    const recoveredChecks = previousFailures.map((id) => {
+      const check = snapshot.checks.find((candidate) => candidate.id === id);
+      return `• *${check?.label ?? id}*`;
+    }).join("\n");
+    return `:large_green_circle: *OS health outage recovered*\nAll ${snapshot.checks.length} production checks are healthy again.\n\n*Recovered checks*\n${recoveredChecks}\n\n<${dashboardUrl}|Open health dashboard>\n\n[os-health-recovery] ${previousFailures.join(",")}`;
+  }
+
   const started = previousFailures.length === 0;
   const title = started
     ? ":red_circle: *OS health outage detected*"
@@ -137,7 +145,7 @@ async function runCycle(state, config) {
   }
 
   const previousFailures = state.failureIds ?? [];
-  if (shouldPostOutage(state.failureIds, currentFailures)) {
+  if (shouldPostStateChange(state.failureIds, currentFailures)) {
     await postSlack(
       config.webhookUrl,
       buildStateChangeMessage(previousFailures, currentFailures, snapshot, config.dashboardUrl),

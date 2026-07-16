@@ -4,7 +4,7 @@ import {
   buildStateChangeMessage,
   failureIds,
   sameFailures,
-  shouldPostOutage,
+  shouldPostStateChange,
 } from "./worker.mjs";
 
 const snapshot = {
@@ -27,11 +27,22 @@ test("builds outage messages with state markers", () => {
   assert.match(incident, /\[os-health-outage\] failed/);
 });
 
-test("posts only new or changed active outages", () => {
-  assert.equal(shouldPostOutage(null, []), false);
-  assert.equal(shouldPostOutage(null, ["failed"]), true);
-  assert.equal(shouldPostOutage([], ["failed"]), true);
-  assert.equal(shouldPostOutage(["failed"], ["failed"]), false);
-  assert.equal(shouldPostOutage(["failed"], []), false);
-  assert.equal(shouldPostOutage(["failed"], ["other"]), true);
+test("builds recovery messages with recovered check details", () => {
+  const recovery = buildStateChangeMessage(["failed"], [], {
+    checks: snapshot.checks.map((check) => ({ ...check, state: "healthy", detail: "Ready", statusCode: 200 })),
+  }, "https://health.opensoftware.co");
+  assert.match(recovery, /outage recovered/);
+  assert.match(recovery, /All 2 production checks are healthy again/);
+  assert.match(recovery, /Failed API/);
+  assert.match(recovery, /\[os-health-recovery\] failed/);
+});
+
+test("posts new and changed outages and recoveries", () => {
+  assert.equal(shouldPostStateChange(null, []), false);
+  assert.equal(shouldPostStateChange(null, ["failed"]), true);
+  assert.equal(shouldPostStateChange([], ["failed"]), true);
+  assert.equal(shouldPostStateChange(["failed"], ["failed"]), false);
+  assert.equal(shouldPostStateChange(["failed"], []), true);
+  assert.equal(shouldPostStateChange(["failed"], ["other"]), true);
+  assert.equal(shouldPostStateChange([], []), false);
 });
