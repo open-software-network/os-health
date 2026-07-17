@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildStateChangeMessage,
+  collectSnapshot,
   failureIds,
   sameFailures,
   shouldPostStateChange,
@@ -45,4 +46,35 @@ test("posts new and changed outages and recoveries", () => {
   assert.equal(shouldPostStateChange(["failed"], []), true);
   assert.equal(shouldPostStateChange(["failed"], ["other"]), true);
   assert.equal(shouldPostStateChange([], []), false);
+});
+
+test("treats the public June Chat portal as healthy on HTTP 200", async () => {
+  const result = await collectSnapshot({
+    fetchImpl: async (url) => {
+      if (url === "https://chat.opensoftware.co/") {
+        return new Response("June Chat", { status: 200 });
+      }
+      if (url.endsWith("/healthz")) {
+        return Response.json({ success: true, data: { status: "healthy" } });
+      }
+      if (
+        url.endsWith("/v1/dictate/cleanup")
+        || url.endsWith("/v1/notes/generate")
+        || url.endsWith("/v1/chat/completions")
+      ) {
+        return Response.json({ error_code: 3001 }, { status: 401 });
+      }
+      return new Response("OK", { status: 200 });
+    },
+  });
+
+  const portal = result.checks.find((check) => check.id === "chat-portal");
+  assert.deepEqual(portal, {
+    id: "chat-portal",
+    label: "June Chat portal",
+    state: "healthy",
+    latencyMs: portal.latencyMs,
+    statusCode: 200,
+    detail: "Public portal is reachable",
+  });
 });

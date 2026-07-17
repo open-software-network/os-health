@@ -10,7 +10,11 @@ The shared check catalog covers:
 - OS API liveness and readiness
 - OS Accounts API readiness
 - OS Chat API, inference, and sync readiness
-- Open Software, OS Accounts, OS Chat, and health portals
+- Open Software, OS Accounts, public June Chat, and health portals
+
+The June Chat portal probe requires a public `200` response from
+`https://chat.opensoftware.co/`. The portal is hosted on Railway and no longer
+uses an authentication challenge at the web edge.
 
 The June product API probes send valid minimal request shapes without a bearer token and require the expected `401` and `error_code: 3001` response. They verify route wiring and the authentication boundary without invoking an upstream provider, mutating user data, or consuming credits.
 

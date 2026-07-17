@@ -169,14 +169,14 @@
   {
     "id": "chat-portal",
     "group": "Product portals",
-    "label": "OS Chat portal",
-    "description": "Chat product portal",
+    "label": "June Chat portal",
+    "description": "Public June Chat web app",
     "envVar": "CHAT_WEB_URL",
     "defaultOrigin": "https://chat.opensoftware.co",
     "path": "/",
-    "expectedStatusCode": 401,
+    "expectedStatusCode": 200,
     "critical": false,
-    "healthyDetail": "Authentication boundary is reachable"
+    "healthyDetail": "Public portal is reachable"
   },
   {
     "id": "health-dashboard",
